@@ -41,19 +41,19 @@ const state = {
   theme: localStorage.getItem('caws_theme') || 'light',
 
   user: {
-    fullName: 'Maria Elena Santos',
-    email: 'adopter@caws.org',
-    password: 'Pass12345',
-    phone: '09171234567',
-    address: 'Nazareth, Cagayan de Oro City',
+    fullName: '',
+    email: '',
+    password: '',
+    phone: '',
+    address: '',
     adopterId: 'ADP-0842'
   },
 
   request: {
     selectedPetId: '1',
     idType: 'Philippine National ID (PhilSys)',
-    idAttached: true,
-    reason: 'Loving family home with a secured yard and time for daily care.'
+    idAttached: false,
+    reason: ''
   },
 
   submission: {
@@ -108,41 +108,6 @@ function toggleTheme() {
   state.theme = state.theme === 'light' ? 'dark' : 'light';
   localStorage.setItem('caws_theme', state.theme);
   document.documentElement.setAttribute('data-theme', state.theme);
-  render();
-}
-
-// Demo Helper: Re-fill defaults instantly
-function fillDemoData() {
-  state.user.fullName = 'Maria Elena Santos';
-  state.user.email = 'adopter@caws.org';
-  state.user.password = 'Pass12345';
-  state.user.phone = '09171234567';
-  state.user.address = 'Nazareth, Cagayan de Oro City';
-  state.request.selectedPetId = '1';
-  state.request.idAttached = true;
-  state.request.reason = 'Loving family home with a secured yard and time for daily care.';
-  state.errors = {};
-  render();
-}
-
-// Demo Helper: Clear fields to demonstrate error handling to the instructor
-function clearForErrorDemo() {
-  if (state.currentStep === 'login') {
-    state.user.email = '';
-    state.user.password = '';
-  } else if (state.currentStep === 'register') {
-    state.user.fullName = '';
-    state.user.email = '';
-    state.user.password = '';
-  } else if (state.currentStep === 'user_info') {
-    state.user.fullName = '';
-    state.user.phone = '';
-    state.user.address = '';
-  } else if (state.currentStep === 'request_info') {
-    state.request.reason = '';
-    state.request.idAttached = false;
-  }
-  state.errors = {};
   render();
 }
 
@@ -258,22 +223,6 @@ function renderErrorSummary(errors) {
   `;
 }
 
-function renderDemoToolBar() {
-  return `
-    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-subtle); border:1px dashed var(--border-color); border-radius:var(--radius-sm); padding:6px 12px; margin-bottom:18px; font-size:0.75rem;">
-      <span style="color:var(--text-secondary); font-weight:600;">Presentation Mode:</span>
-      <div style="display:flex; gap:8px;">
-        <button type="button" onclick="window.fillDemoData()" class="btn-edit-link" style="color:var(--primary); font-weight:700;">
-          Quick Demo Fill
-        </button>
-        <span style="color:var(--border-color);">|</span>
-        <button type="button" onclick="window.clearForErrorDemo()" class="btn-edit-link" style="color:var(--error);">
-          Clear (Test Errors)
-        </button>
-      </div>
-    </div>
-  `;
-}
 
 function renderField({ id, label, value = '', placeholder = '', helper = '', error = '', type = 'text', required = true, isPassword = false }) {
   const isInvalid = Boolean(error);
@@ -372,7 +321,6 @@ function renderLogin() {
         <p>Access your applicant profile.</p>
       </div>
 
-      ${renderDemoToolBar()}
       ${renderErrorSummary(state.errors)}
 
       <form id="form_login" onsubmit="event.preventDefault(); window.handleLoginSubmit();" class="form-stack" novalidate>
@@ -428,7 +376,6 @@ function renderRegister() {
         <p>Quick 3-field registration.</p>
       </div>
 
-      ${renderDemoToolBar()}
       ${renderErrorSummary(state.errors)}
 
       <form id="form_register" onsubmit="event.preventDefault(); window.handleRegisterSubmit();" class="form-stack" novalidate>
@@ -486,7 +433,6 @@ function renderUserInfo() {
         <p>Basic contact and residence details for verification.</p>
       </div>
 
-      ${renderDemoToolBar()}
       ${renderErrorSummary(state.errors)}
 
       <form id="form_user_info" onsubmit="event.preventDefault(); window.handleUserInfoSubmit();" class="form-stack" novalidate>
@@ -545,7 +491,6 @@ function renderRequestInfo() {
         <p>Pick a pet and confirm your adoption request.</p>
       </div>
 
-      ${renderDemoToolBar()}
       ${renderErrorSummary(state.errors)}
 
       <form id="form_request_info" onsubmit="event.preventDefault(); window.handleRequestInfoSubmit();" class="form-stack" novalidate>
@@ -843,8 +788,6 @@ function attachInputListeners() {
 // --- 9. Global Handlers ---
 window.navigateTo = navigateTo;
 window.toggleTheme = toggleTheme;
-window.fillDemoData = fillDemoData;
-window.clearForErrorDemo = clearForErrorDemo;
 
 window.togglePasswordVisibility = function() {
   state.pwdVisible = !state.pwdVisible;
@@ -858,18 +801,36 @@ window.togglePasswordVisibility = function() {
 };
 
 window.handleLoginSubmit = function() {
+  const emailEl = document.getElementById('login_email');
+  const pwdEl = document.getElementById('login_password');
+  if (emailEl) state.user.email = emailEl.value;
+  if (pwdEl) state.user.password = pwdEl.value;
   if (validateLogin()) navigateTo('user_info');
 };
 
 window.handleRegisterSubmit = function() {
+  const nameEl = document.getElementById('reg_name');
+  const emailEl = document.getElementById('reg_email');
+  const pwdEl = document.getElementById('reg_password');
+  if (nameEl) state.user.fullName = nameEl.value;
+  if (emailEl) state.user.email = emailEl.value;
+  if (pwdEl) state.user.password = pwdEl.value;
   if (validateRegister()) navigateTo('user_info');
 };
 
 window.handleUserInfoSubmit = function() {
+  const nameEl = document.getElementById('user_fullName');
+  const phoneEl = document.getElementById('user_phone');
+  const addrEl = document.getElementById('user_address');
+  if (nameEl) state.user.fullName = nameEl.value;
+  if (phoneEl) state.user.phone = phoneEl.value;
+  if (addrEl) state.user.address = addrEl.value;
   if (validateUserInfo()) navigateTo('request_info');
 };
 
 window.handleRequestInfoSubmit = function() {
+  const reasonEl = document.getElementById('req_reason');
+  if (reasonEl) state.request.reason = reasonEl.value;
   if (validateRequestInfo()) navigateTo('review');
 };
 
